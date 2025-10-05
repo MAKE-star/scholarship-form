@@ -38,7 +38,7 @@ exports.handler = async (event) => {
     // Connect to MongoDB
     await client.connect();
 
-    const db = client.db("scholist");
+    const db = client.db("test");
     const collection = db.collection("scholarships");
 
     // Prepare the scholarship document matching the schema
