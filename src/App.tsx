@@ -13,14 +13,26 @@ function App() {
     gender: "",
     companyName: "",
     organization: "",
-    religion: [],
-    race: [],
+    religion: [] as string[],
+    race: [] as string[],
     location: ["No Geographic Restrictions"],
     majors: ["All Majors Eligible"],
     stage: ["no restrictions"],
-    sports: [],
-    disability: [],
-    personalAttributes: []
+    sports: [] as string[],
+    disability: [] as string[],
+    personalAttributes: [] as string[]
+  });
+
+  // Raw string state for array fields — lets user type freely including commas/spaces
+  const [rawArrays, setRawArrays] = useState({
+    religion: "",
+    race: "",
+    location: "No Geographic Restrictions",
+    majors: "All Majors Eligible",
+    stage: "no restrictions",
+    sports: "",
+    disability: "",
+    personalAttributes: ""
   });
 
   const [loading, setLoading] = useState(false);
@@ -32,9 +44,15 @@ function App() {
     setForm({ ...form, [name]: value });
   };
 
-  const handleArrayChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
-    const values = e.target.value.split(',').map((v: string) => v.trim()).filter((v: string) => v);
-    setForm({ ...form, [field]: values });
+  // Update raw string while typing; only parse into array on blur
+  const handleArrayRawChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
+    setRawArrays({ ...rawArrays, [field]: e.target.value });
+  };
+
+  const handleArrayBlur = (field: string) => {
+    const raw = rawArrays[field as keyof typeof rawArrays];
+    const parsed = raw.split(',').map((v: string) => v.trim()).filter((v: string) => v);
+    setForm({ ...form, [field]: parsed });
   };
 
   const handleSubmit = async () => {
@@ -42,6 +60,19 @@ function App() {
       setError("Scholarship name is required");
       return;
     }
+
+    // Final parse of all raw array fields before submitting
+    const finalForm = {
+      ...form,
+      religion: rawArrays.religion.split(',').map(v => v.trim()).filter(Boolean),
+      race: rawArrays.race.split(',').map(v => v.trim()).filter(Boolean),
+      location: rawArrays.location.split(',').map(v => v.trim()).filter(Boolean),
+      majors: rawArrays.majors.split(',').map(v => v.trim()).filter(Boolean),
+      stage: rawArrays.stage.split(',').map(v => v.trim()).filter(Boolean),
+      sports: rawArrays.sports.split(',').map(v => v.trim()).filter(Boolean),
+      disability: rawArrays.disability.split(',').map(v => v.trim()).filter(Boolean),
+      personalAttributes: rawArrays.personalAttributes.split(',').map(v => v.trim()).filter(Boolean),
+    };
 
     setLoading(true);
     setError("");
@@ -53,7 +84,7 @@ function App() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(finalForm),
       });
 
       const result = await res.json();
@@ -80,6 +111,16 @@ function App() {
           sports: [],
           disability: [],
           personalAttributes: []
+        });
+        setRawArrays({
+          religion: "",
+          race: "",
+          location: "No Geographic Restrictions",
+          majors: "All Majors Eligible",
+          stage: "no restrictions",
+          sports: "",
+          disability: "",
+          personalAttributes: ""
         });
       } else {
         setError(result.error || "Failed to create scholarship");
@@ -297,8 +338,9 @@ function App() {
                   </label>
                   <input
                     placeholder="e.g., California, Texas, No Geographic Restrictions"
-                    value={form.location.join(', ')}
-                    onChange={(e) => handleArrayChange(e, 'location')}
+                    value={rawArrays.location}
+                    onChange={(e) => handleArrayRawChange(e, 'location')}
+                    onBlur={() => handleArrayBlur('location')}
                     className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none"
                   />
                 </div>
@@ -310,8 +352,9 @@ function App() {
                   </label>
                   <input
                     placeholder="e.g., Engineering, Computer Science, All Majors Eligible"
-                    value={form.majors.join(', ')}
-                    onChange={(e) => handleArrayChange(e, 'majors')}
+                    value={rawArrays.majors}
+                    onChange={(e) => handleArrayRawChange(e, 'majors')}
+                    onBlur={() => handleArrayBlur('majors')}
                     className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none"
                   />
                 </div>
@@ -323,8 +366,9 @@ function App() {
                   </label>
                   <input
                     placeholder="e.g., Undergraduate, Graduate, no restrictions"
-                    value={form.stage.join(', ')}
-                    onChange={(e) => handleArrayChange(e, 'stage')}
+                    value={rawArrays.stage}
+                    onChange={(e) => handleArrayRawChange(e, 'stage')}
+                    onBlur={() => handleArrayBlur('stage')}
                     className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none"
                   />
                 </div>
@@ -336,8 +380,9 @@ function App() {
                   </label>
                   <input
                     placeholder="e.g., Basketball, Soccer"
-                    value={form.sports.join(', ')}
-                    onChange={(e) => handleArrayChange(e, 'sports')}
+                    value={rawArrays.sports}
+                    onChange={(e) => handleArrayRawChange(e, 'sports')}
+                    onBlur={() => handleArrayBlur('sports')}
                     className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none"
                   />
                 </div>
@@ -349,8 +394,9 @@ function App() {
                   </label>
                   <input
                     placeholder="Leave empty if none"
-                    value={form.disability.join(', ')}
-                    onChange={(e) => handleArrayChange(e, 'disability')}
+                    value={rawArrays.disability}
+                    onChange={(e) => handleArrayRawChange(e, 'disability')}
+                    onBlur={() => handleArrayBlur('disability')}
                     className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none"
                   />
                 </div>
@@ -362,8 +408,9 @@ function App() {
                   </label>
                   <input
                     placeholder="Leave empty if none"
-                    value={form.religion.join(', ')}
-                    onChange={(e) => handleArrayChange(e, 'religion')}
+                    value={rawArrays.religion}
+                    onChange={(e) => handleArrayRawChange(e, 'religion')}
+                    onBlur={() => handleArrayBlur('religion')}
                     className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none"
                   />
                 </div>
@@ -375,8 +422,9 @@ function App() {
                   </label>
                   <input
                     placeholder="Leave empty if none"
-                    value={form.race.join(', ')}
-                    onChange={(e) => handleArrayChange(e, 'race')}
+                    value={rawArrays.race}
+                    onChange={(e) => handleArrayRawChange(e, 'race')}
+                    onBlur={() => handleArrayBlur('race')}
                     className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none"
                   />
                 </div>
@@ -388,8 +436,9 @@ function App() {
                   </label>
                   <input
                     placeholder="e.g., First-generation, Low-income"
-                    value={form.personalAttributes.join(', ')}
-                    onChange={(e) => handleArrayChange(e, 'personalAttributes')}
+                    value={rawArrays.personalAttributes}
+                    onChange={(e) => handleArrayRawChange(e, 'personalAttributes')}
+                    onBlur={() => handleArrayBlur('personalAttributes')}
                     className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none"
                   />
                 </div>
