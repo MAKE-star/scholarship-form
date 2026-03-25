@@ -1,11 +1,24 @@
 import { useState } from "react";
 
+const CHECKLIST_OPTIONS = [
+  "Essay",
+  "FAFSA",
+  "Transcripts",
+  "Letter Of Recommendation",
+  "Resume",
+  "Financial Statement",
+  "Portfolio",
+  "Interview",
+];
+
 function App() {
   const [form, setForm] = useState({
     name: "",
     amount: "",
     deadline: "",
     details: "",
+    eligibility: "",
+    checklist: [] as string[],
     link: "",
     awardType: "Scholarship",
     university: "",
@@ -22,6 +35,29 @@ function App() {
     disability: [] as string[],
     personalAttributes: [] as string[]
   });
+
+  const [customChecklistItem, setCustomChecklistItem] = useState("");
+
+  const toggleChecklistItem = (item: string) => {
+    setForm(prev => ({
+      ...prev,
+      checklist: prev.checklist.includes(item)
+        ? prev.checklist.filter(i => i !== item)
+        : [...prev.checklist, item]
+    }));
+  };
+
+  const addCustomChecklistItem = () => {
+    if (!customChecklistItem.trim()) return;
+    if (!form.checklist.includes(customChecklistItem.trim())) {
+      setForm(prev => ({ ...prev, checklist: [...prev.checklist, customChecklistItem.trim()] }));
+    }
+    setCustomChecklistItem("");
+  };
+
+  const removeChecklistItem = (item: string) => {
+    setForm(prev => ({ ...prev, checklist: prev.checklist.filter(i => i !== item) }));
+  };
 
   // Raw string state for array fields — lets user type freely including commas/spaces
   const [rawArrays, setRawArrays] = useState({
@@ -96,6 +132,8 @@ function App() {
           amount: "",
           deadline: "",
           details: "",
+          eligibility: "",
+          checklist: [],
           link: "",
           awardType: "Scholarship",
           university: "",
@@ -443,6 +481,81 @@ function App() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Checklist Section */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b-2 border-green-500">
+                Checklist
+              </h2>
+              <p className="text-sm text-gray-500 mb-4">Select what applicants need to prepare:</p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {CHECKLIST_OPTIONS.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => toggleChecklistItem(item)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition-all ${
+                      form.checklist.includes(item)
+                        ? "bg-green-500 border-green-500 text-white"
+                        : "bg-white border-gray-300 text-gray-700 hover:border-green-400"
+                    }`}
+                  >
+                    {form.checklist.includes(item) ? "✓ " : "+ "}{item}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  placeholder="Add custom item..."
+                  value={customChecklistItem}
+                  onChange={(e) => setCustomChecklistItem(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addCustomChecklistItem()}
+                  className="flex-1 px-4 py-2 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={addCustomChecklistItem}
+                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 font-medium transition-all"
+                >
+                  Add
+                </button>
+              </div>
+              {form.checklist.length > 0 && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Current checklist:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {form.checklist.map((item) => (
+                      <span key={item} className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                        {item}
+                        <button
+                          type="button"
+                          onClick={() => removeChecklistItem(item)}
+                          className="ml-1 text-green-600 hover:text-green-900 font-bold"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Eligibility Section */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b-2 border-teal-500">
+                Eligibility Requirements
+              </h2>
+              <p className="text-sm text-gray-500 mb-3">Enter each requirement on a new line. It can be further formatted in the editor after creation.</p>
+              <textarea
+                placeholder="e.g. Must be a US citizen&#10;Minimum GPA of 3.0&#10;Enrolled full-time"
+                value={form.eligibility}
+                onChange={(e) => setForm(prev => ({ ...prev, eligibility: e.target.value }))}
+                rows={6}
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all outline-none resize-none"
+              />
             </div>
 
             {/* Submit Button */}
