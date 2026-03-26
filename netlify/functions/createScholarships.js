@@ -47,6 +47,8 @@ exports.handler = async (event) => {
       amount: data.amount || "",
       deadline: data.deadline ? new Date(data.deadline) : null,
       details: data.details || "",
+      eligibility: data.eligibility || "",
+      checklist: data.checklist || [],
       link: data.link || "",
       awardType: data.awardType || "Scholarship",
       university: data.university || "",
