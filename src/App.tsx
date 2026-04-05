@@ -59,7 +59,6 @@ function App() {
     setForm(prev => ({ ...prev, checklist: prev.checklist.filter(i => i !== item) }));
   };
 
-  // Raw string state for array fields — lets user type freely including commas/spaces
   const [rawArrays, setRawArrays] = useState({
     religion: "",
     race: "",
@@ -80,7 +79,6 @@ function App() {
     setForm({ ...form, [name]: value });
   };
 
-  // Update raw string while typing; only parse into array on blur
   const handleArrayRawChange = (e: React.ChangeEvent<HTMLInputElement>, field: string) => {
     setRawArrays({ ...rawArrays, [field]: e.target.value });
   };
@@ -97,7 +95,6 @@ function App() {
       return;
     }
 
-    // Final parse of all raw array fields before submitting
     const finalForm = {
       ...form,
       religion: rawArrays.religion.split(',').map(v => v.trim()).filter(Boolean),
@@ -117,14 +114,12 @@ function App() {
     try {
       const res = await fetch("/.netlify/functions/createScholarships", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(finalForm),
       });
 
       const result = await res.json();
-      
+
       if (res.ok) {
         setSuccess("Scholarship created successfully! ID: " + result.id);
         setForm({
@@ -174,39 +169,33 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        {/* Header */}
+
         <div className="text-center mb-8">
           <h1 className="text-4xl font-extrabold text-gray-900 mb-2">Create Scholarship</h1>
           <p className="text-gray-600">Add a new scholarship opportunity to the database</p>
         </div>
 
-        {/* Main Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          {/* Alerts */}
           {error && (
             <div className="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
-              <div className="flex items-center">
-                <span className="text-red-700 font-medium">{error}</span>
-              </div>
+              <span className="text-red-700 font-medium">{error}</span>
             </div>
           )}
-          
           {success && (
             <div className="mb-6 bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
-              <div className="flex items-center">
-                <span className="text-green-700 font-medium">{success}</span>
-              </div>
+              <span className="text-green-700 font-medium">{success}</span>
             </div>
           )}
 
           <div className="space-y-8">
-            {/* Basic Information Section */}
+
+            {/* ── Basic Information ─────────────────────────────────────────── */}
             <div>
               <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b-2 border-indigo-500">
                 Basic Information
               </h2>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Scholarship Name <span className="text-red-500">*</span>
@@ -221,9 +210,7 @@ function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Award Amount
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Award Amount</label>
                   <input
                     name="amount"
                     placeholder="e.g., 5000"
@@ -234,9 +221,7 @@ function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Deadline
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Deadline</label>
                   <input
                     type="date"
                     name="deadline"
@@ -247,9 +232,7 @@ function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Award Type
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Award Type</label>
                   <select
                     name="awardType"
                     value={form.awardType}
@@ -264,9 +247,7 @@ function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    University
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">University</label>
                   <input
                     name="university"
                     placeholder="Optional"
@@ -277,9 +258,7 @@ function App() {
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Application Link
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Application Link</label>
                   <input
                     name="link"
                     type="url"
@@ -296,27 +275,44 @@ function App() {
                   </label>
                   <textarea
                     name="details"
-                    placeholder="Describe the scholarship requirements, eligibility criteria, application process, etc."
+                    placeholder="General description of the scholarship, application process, etc."
                     value={form.details}
                     onChange={handleChange}
                     rows={4}
                     className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none resize-none"
-                  ></textarea>
+                  />
                 </div>
+
               </div>
             </div>
 
-            {/* Eligibility Criteria Section */}
+            {/* ── Eligibility Requirements ──────────────────────────────────── */}
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b-2 border-teal-500">
+                Eligibility Requirements
+              </h2>
+              <p className="text-sm text-gray-500 mb-3">
+                Enter each requirement on a new line. Can be further formatted in the editor after creation.
+              </p>
+              <textarea
+                name="eligibility"
+                placeholder={"e.g. Must be a US citizen\nMinimum GPA of 3.0\nEnrolled full-time"}
+                value={form.eligibility}
+                onChange={handleChange}
+                rows={6}
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all outline-none resize-none"
+              />
+            </div>
+
+            {/* ── Eligibility Criteria (filters) ────────────────────────────── */}
             <div>
               <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b-2 border-purple-500">
                 Eligibility Criteria
               </h2>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Minimum GPA
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Minimum GPA</label>
                   <input
                     name="gpa"
                     placeholder="e.g., 3.5"
@@ -327,9 +323,7 @@ function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Gender Requirement
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Gender Requirement</label>
                   <select
                     name="gender"
                     value={form.gender}
@@ -344,9 +338,7 @@ function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Company Name
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Company Name</label>
                   <input
                     name="companyName"
                     placeholder="Optional"
@@ -357,9 +349,7 @@ function App() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Organization
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Organization</label>
                   <input
                     name="organization"
                     placeholder="Optional"
@@ -371,8 +361,7 @@ function App() {
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Geographic Locations
-                    <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
+                    Geographic Locations <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
                   </label>
                   <input
                     placeholder="e.g., California, Texas, No Geographic Restrictions"
@@ -385,8 +374,7 @@ function App() {
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Eligible Majors
-                    <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
+                    Eligible Majors <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
                   </label>
                   <input
                     placeholder="e.g., Engineering, Computer Science, All Majors Eligible"
@@ -399,8 +387,7 @@ function App() {
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Academic Stage
-                    <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
+                    Academic Stage <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
                   </label>
                   <input
                     placeholder="e.g., Undergraduate, Graduate, no restrictions"
@@ -413,8 +400,7 @@ function App() {
 
                 <div className="md:col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Sports
-                    <span className="text-gray-500 text-xs ml-2">(comma-separated, leave empty if none)</span>
+                    Sports <span className="text-gray-500 text-xs ml-2">(comma-separated, leave empty if none)</span>
                   </label>
                   <input
                     placeholder="e.g., Basketball, Soccer"
@@ -427,8 +413,7 @@ function App() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Disability Requirements
-                    <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
+                    Disability Requirements <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
                   </label>
                   <input
                     placeholder="Leave empty if none"
@@ -441,8 +426,7 @@ function App() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Religion
-                    <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
+                    Religion <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
                   </label>
                   <input
                     placeholder="Leave empty if none"
@@ -455,8 +439,7 @@ function App() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Race/Ethnicity
-                    <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
+                    Race/Ethnicity <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
                   </label>
                   <input
                     placeholder="Leave empty if none"
@@ -469,8 +452,7 @@ function App() {
 
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Personal Attributes
-                    <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
+                    Personal Attributes <span className="text-gray-500 text-xs ml-2">(comma-separated)</span>
                   </label>
                   <input
                     placeholder="e.g., First-generation, Low-income"
@@ -480,10 +462,11 @@ function App() {
                     className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all outline-none"
                   />
                 </div>
+
               </div>
             </div>
 
-            {/* Checklist Section */}
+            {/* ── Checklist ─────────────────────────────────────────────────── */}
             <div>
               <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b-2 border-green-500">
                 Checklist
@@ -543,22 +526,7 @@ function App() {
               )}
             </div>
 
-            {/* Eligibility Section */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-6 pb-2 border-b-2 border-teal-500">
-                Eligibility Requirements
-              </h2>
-              <p className="text-sm text-gray-500 mb-3">Enter each requirement on a new line. It can be further formatted in the editor after creation.</p>
-              <textarea
-                placeholder="e.g. Must be a US citizen&#10;Minimum GPA of 3.0&#10;Enrolled full-time"
-                value={form.eligibility}
-                onChange={(e) => setForm(prev => ({ ...prev, eligibility: e.target.value }))}
-                rows={6}
-                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all outline-none resize-none"
-              />
-            </div>
-
-            {/* Submit Button */}
+            {/* ── Submit ────────────────────────────────────────────────────── */}
             <div className="flex justify-end pt-6 border-t border-gray-200">
               <button
                 onClick={handleSubmit}
@@ -578,6 +546,7 @@ function App() {
                 )}
               </button>
             </div>
+
           </div>
         </div>
       </div>
